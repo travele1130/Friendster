@@ -1,0 +1,205 @@
+<?php 
+
+$page           = (!empty($_GET['page-id']) && is_numeric($_GET['page-id'])) ? $_GET['page-id'] : 1;
+$filter_keyword = (!empty($_GET['query'])) ? Wo_Secure($_GET['query']) : '';
+$db->pageLimit  = 50;
+
+
+if (!empty($filter_keyword)) {
+  $sql   = "(
+    `username`     LIKE '%$filter_keyword%' OR 
+    `email`        LIKE '%$filter_keyword%' OR 
+    `first_name`   LIKE '%$filter_keyword%' OR 
+    `ip_address`   LIKE '%$filter_keyword%' OR 
+    `phone_number` LIKE '%$filter_keyword%' OR 
+    `last_name`    LIKE '%$filter_keyword%'
+  )";
+
+  $users = $db->where($sql)->orderBy('user_id', 'DESC')->objectbuilder()->paginate(T_USERS, $page);
+} 
+
+else {
+  $users = $db->objectbuilder()->orderBy('user_id', 'DESC')->paginate(T_USERS, $page);
+}
+
+if (($page > $db->totalPages) && !empty($_GET['page-id'])) {
+  header("Location: " . Wo_LoadAdminLinkSettings('manage-users'));
+  exit();
+}
+
+?>
+<div class="container-fluid">
+    <div class="block-header">
+        <h2>用户 > 管理用户</h2>
+    </div>
+    <!-- Vertical Layout -->
+    <div class="row">
+        <div class="col-lg-3 col-md-3">
+            <div class="info-box bg-light-green hover-expand-effect">
+                <div class="icon">
+                    <i class="material-icons">account_box</i>
+                </div>
+                <div class="content">
+                    <div class="text">男性</div>
+                    <div class="number count-to" data-from="0" data-to="<?php echo Wo_CountUserData('male'); ?>" data-speed="1000" data-fresh-interval="20"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-3 ">
+            <div class="info-box bg-light-green hover-expand-effect">
+                <div class="icon">
+                    <i class="material-icons">account_circle</i>
+                </div>
+                <div class="content">
+                    <div class="text">女性</div>
+                    <div class="number count-to" data-from="0" data-to="<?php echo Wo_CountUserData('female'); ?>" data-speed="1000" data-fresh-interval="20"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-3 ">
+            <div class="info-box bg-light-green hover-expand-effect">
+                <div class="icon">
+                    <i class="material-icons">people_outline</i>
+                </div>
+                <div class="content">
+                    <div class="text">活跃用户</div>
+                    <div class="number count-to" data-from="0" data-to="<?php echo Wo_CountUserData('active'); ?>" data-speed="1000" data-fresh-interval="20"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-3 ">
+            <div class="info-box bg-light-green hover-expand-effect">
+                <div class="icon">
+                    <i class="material-icons">mail_outline</i>
+                </div>
+                <div class="content">
+                    <div class="text">不活跃用户</div>
+                    <div class="number count-to" data-from="0" data-to="<?php echo Wo_CountUserData('not_active'); ?>" data-speed="1000" data-fresh-interval="20"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-12 col-md-12">
+            <div class="card">
+                <div class="header">
+                    <h2>管理 & 编辑用户</h2>
+                </div>
+                <div class="body">
+                    <div class="row">
+                      <div class="col-md-4" style="margin-bottom:0;">
+                        <form method="get" action="<?php echo Wo_LoadAdminLinkSettings('manage-users'); ?>">
+                          <div class="row">
+                            <div class="col-md-11">
+                              <div class="form-group form-float">
+                                  <div class="form-line">
+                                      <input type="text" name="query" id="query" class="form-control" value="<?php echo($filter_keyword); ?>">
+                                      <label class="form-label search-form">
+                                        搜索用户名，电子邮件，名字，姓氏
+                                      </label>
+                                  </div>
+                              </div>
+                            </div>
+                            <div class="col-md-1">
+                               <button class="btn btn-info">搜索</button>
+                            </div>
+                          </div>
+                          <div class="clearfix"></div>
+                        </form>
+                      </div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="table-responsive1">
+                        <table class="table table-bordered table-striped table-hover">
+                            <thead>
+                            <tr>
+                              <th>ID</th>
+  					                  <th>用户名</th>
+  					                  <th>来源</th>
+  					                  <th>电子邮件</th>
+  					                  <th>IP地址</th>
+  					                  <th>状态</th>
+  					                  <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                              <?php 
+        				                foreach ($users as $userlist) {
+                                  $wo['userlist'] = Wo_UserData($userlist->user_id);
+        				                  echo Wo_LoadAdminPage('manage-users/list');
+        				                }
+				                      ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="wo-admincp-feturepager">
+                      <div class="pull-left">
+                        <span>
+                          <?php echo "显示 $page 共" . $db->totalPages; ?>
+                        </span>
+                      </div>
+                      <div class="pull-right">
+                        <nav>
+                          <ul class="pagination">
+                            <li>
+                              <a href="<?php echo Wo_LoadAdminLinkSettings('manage-users?page-id=1'); ?>" class="waves-effect" title='第一页'>
+                                  <i class="material-icons">first_page</i>
+                              </a>
+                            </li>
+                            <?php if ($page > 1) {  ?>
+                              <li>
+                                  <a href="<?php echo Wo_LoadAdminLinkSettings('manage-users?page-id=' . ($page - 1)); ?>" class="waves-effect" title='上一页'>
+                                      <i class="material-icons">chevron_left</i>
+                                  </a>
+                              </li>
+                            <?php  } ?>
+
+                            <?php 
+                              $nums       = 0;
+                              $nums_pages = ($page > 4) ? ($page - 4) : $page;
+
+                              for ($i=$nums_pages; $i <= $db->totalPages; $i++) { 
+                                if ($nums < 20) {
+                            ?>
+                              <li class="<?php echo ($page == $i) ? 'active' : ''; ?>">
+                                <a href="<?php echo Wo_LoadAdminLinkSettings('manage-users?page-id=' . ($i)); ?>" class="waves-effect">
+                                  <?php echo $i ?>   
+                                </a>
+                              </li>
+
+                            <?php } $nums++; }?>
+
+                            <?php if ($db->totalPages > $page) { ?>
+                              <li>
+                                  <a href="<?php echo Wo_LoadAdminLinkSettings('manage-users?page-id=' . ($page + 1)); ?>" class="waves-effect" title="下一页">
+                                      <i class="material-icons">chevron_right</i>
+                                  </a>
+                              </li>
+                            <?php } ?>
+                            <li>
+                              <a href="<?php echo Wo_LoadAdminLinkSettings('manage-users?page-id=' . ($db->totalPages)); ?>" class="waves-effect" title='最后一页'>
+                                  <i class="material-icons">last_page</i>
+                              </a>
+                            </li>
+                          </ul>
+                        </nav>
+                      </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+<script>
+
+function Wo_DeleteUser(user_id) {
+  if (confirm("您确定要删除此用户吗？") == false) {
+    return false;
+  }
+  hash_id = $('#hash_id').val();
+  $('#UserID_' + user_id).fadeOut(300, function() {
+    $(this).remove();
+  });
+  $.get(Wo_Ajax_Requests_File(),{f:'admin_setting', s:'delete_user', user_id: user_id, hash_id: hash_id});
+}
+
+</script>

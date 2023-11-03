@@ -1,0 +1,123 @@
+<div class="container-fluid">
+    <div class="block-header">
+        <h2>广告 > 广告系统设置</h2>
+    </div>
+    <!-- Vertical Layout -->
+    <div class="row">
+        <div class="col-lg-6 col-md-6">
+            <div class="card">
+                <div class="header">
+                    <h2>广告设置</h2>
+                </div>
+                <div class="body">
+                    <div class="alert alert-success ads-settings-alert"></div>
+                    <form class="ads-settings" method="POST">
+                        <label for="user_ads">广告系统 <span class="black" data-toggle="popover" data-trigger="hover" data-content="Allow users to create ads."><i class="fa fa-question-circle fa-fw"></i></span></label>
+                        <div class="form-group">
+                            <input type="radio" name="user_ads" id="user_ads-enabled" value="1" <?php echo ($wo['config']['user_ads'] == 1) ? 'checked': '';?>>
+                            <label for="user_ads-enabled">启用</label>
+                            <input type="radio" name="user_ads" id="user_ads-disabled" value="0" <?php echo ($wo['config']['user_ads'] == 0) ? 'checked': '';?>>
+                            <label for="user_ads-disabled" class="m-l-20">禁用</label>
+                        </div>
+                        <br>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <input type="text" id="ad_v_price" name="ad_v_price" class="form-control" value="<?php echo $wo['config']['ad_v_price'];?>">
+                                <label class="form-label">按展示费用（每个广告）</label>
+                            </div>
+                        </div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <input type="text" id="ad_c_price" name="ad_c_price" class="form-control" value="<?php echo $wo['config']['ad_c_price'];?>">
+                                <label class="form-label">按点击费用（每个广告）</label>
+                            </div>
+                        </div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <input type="text" id="video_ad_skip" name="video_ad_skip" class="form-control" value="<?php echo $wo['config']['video_ad_skip'];?>">
+                                <label class="form-label">视频广告跳过按秒</label>
+                            </div>
+                        </div>
+                        <label for="ads_currency">货币</label>
+                        <select class="form-control show-tick" id="ads_currency" name="ads_currency">
+                          <option value="USD" <?php echo ($wo['config']['ads_currency'] == 'USD')  ? ' selected': '';?>>USD</option>
+                          <option value="EUR" <?php echo ($wo['config']['ads_currency'] == 'EUR')  ? ' selected': '';?>>EUR</option>
+                          <option value="JPY" <?php echo ($wo['config']['ads_currency'] == 'JPY')  ? ' selected': '';?>>JPY</option>
+                          <option value="TRY" <?php echo ($wo['config']['ads_currency'] == 'TRY')  ? ' selected': '';?>>TRY</option>
+                          <option value="GBP" <?php echo ($wo['config']['ads_currency'] == 'GBP')  ? ' selected': '';?>>GBP</option>
+                          <option value="RUB" <?php echo ($wo['config']['ads_currency'] == 'RUB')  ? ' selected': '';?>>RUB</option>
+                          <option value="PLN" <?php echo ($wo['config']['ads_currency'] == 'PLN')  ? ' selected': '';?>>PLN</option>
+                          <option value="ILS" <?php echo ($wo['config']['ads_currency'] == 'ILS')  ? ' selected': '';?>>ILS</option>
+                          <option value="BRL" <?php echo ($wo['config']['ads_currency'] == 'BRL')  ? ' selected': '';?>>BRL</option>
+                          <option value="INR" <?php echo ($wo['config']['ads_currency'] == 'INR')  ? ' selected': '';?>>INR</option>
+                        </select>
+                        <div class="clearfix"></div>
+                        <br><br>
+                        <input type="hidden" name="hash_id" value="<?php echo Wo_CreateSession();?>">
+                        <button type="submit" class="btn btn-primary m-t-15 waves-effect">保存</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6">
+            <div class="card">
+                <div class="header">
+                    <h2>充值 <?php echo $wo['user']['name'] ?>'钱包</h2>
+                </div>
+                <div class="body">
+                    <div class="alert alert-success top-up-settings-alert"></div>
+                    <form class="top-up-settings" method="POST">
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <input type="text" id="amount" name="amount" class="form-control" value="<?php echo $wo['user']['wallet'];?>">
+                                <label class="form-label">金额</label>
+                            </div>
+                        </div>
+                        <input type="hidden" name="hash_id" value="<?php echo Wo_CreateSession();?>">
+                        <button type="submit" class="btn btn-primary m-t-15 waves-effect">充值</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <!-- #END# Vertical Layout -->
+<script>
+$(function() {
+    var form_ads_settings = $('form.ads-settings');
+    form_ads_settings.ajaxForm({
+        url: Wo_Ajax_Requests_File() + '?f=admin_setting&s=update_general_setting',
+        beforeSend: function() {
+            form_ads_settings.find('.waves-effect').text('请稍后..');
+        },
+        success: function(data) {
+            if (data.status == 200) {
+                form_ads_settings.find('.waves-effect').text('保存');
+                $("html, body").animate({ scrollTop: 0 }, "slow");
+                $('.ads-settings-alert').html('<i class="fa fa-check"></i> 设置更新成功');
+                setTimeout(function () {
+                    $('.ads-settings-alert').empty();
+                }, 2000);
+            }
+        }
+    });
+
+    var form_top_settings = $('form.top-up-settings');
+    form_top_settings.ajaxForm({
+        url: Wo_Ajax_Requests_File() + '?f=admin_setting&s=top_up_wallet',
+        beforeSend: function() {
+            form_top_settings.find('.waves-effect').text('请稍后..');
+        },
+        success: function(data) {
+            if (data.status == 200) {
+                $("html, body").animate({ scrollTop: 0 }, "slow");
+                $('.top-up-settings-alert').html('<i class="fa fa-check"></i> 已成功添加到您的钱包中的金额');
+                setTimeout(function () {
+                    $('.top-up-settings-alert').empty();
+                }, 2000);
+            }
+            form_top_settings.find('.waves-effect').text('保存');
+        }
+    });
+});
+</script>
